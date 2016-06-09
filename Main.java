@@ -50,6 +50,6 @@ public class Main {
         Tools.printBits(Integer.parseInt(S_DES.decrypt(S_DES.getSubK(), S_DES.getCm(), 4), 2), 12);//decrypt + decrypted message
 
         //Tools.printBits(Integer.parseInt(S_DES.decrypt(S_DES.getSubK(), "000111011011", 4), 2), 12);
-       Tools.printBits(Integer.parseInt(Attack.encryptForDC(S_DES.getSubK(), "000111011011", 3), 2), 12);
+        //Tools.printBits(Integer.parseInt(Attack.encryptForDC(S_DES.getSubK(), "000111011011", 3), 2), 12);
     }
 }

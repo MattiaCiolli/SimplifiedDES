@@ -11,17 +11,18 @@ public class S_DES {
 
     private static int K;
     private static String M, Cm;
-
-    public static void setSubK(int[] subK) {
-        SubK = subK;
-    }
-
     private static int[] SubK = new int[4];
+
+    public static int[] getSubK() {
+        return SubK;
+    }
 
 
 //getters and setters
 
-    public static int[] getSubK() { return SubK;}
+    public static void setSubK(int[] subK) {
+        SubK = subK;
+    }
 
     public static void setSubK(int v, int p) {
         SubK[p] = v;
@@ -107,7 +108,7 @@ public class S_DES {
             }
             */
 
-            System.out.print("Round "+(i+1)+": ");
+            System.out.print("Round " + (i + 1) + ": ");
             Tools.printBits(Integer.parseInt(Integer.toBinaryString(cml) + mrt, 2), 12);
             System.out.print("\n");
 
@@ -156,14 +157,14 @@ public class S_DES {
             cml = Integer.parseInt(mrt, 2);//swaps the left part with the right one
             mrt = cmr;//swaps the right part with the left one
 
-            System.out.print("Round "+(r-i)+": ");
+            System.out.print("Round " + (r - i) + ": ");
             Tools.printBits(Integer.parseInt(Integer.toBinaryString(cml) + mrt, 2), 12);
             System.out.print("\n");
 
         }
 
         System.out.println("\nDecrypted message : ");
-        return mrt + Tools.adjustLength(Integer.toBinaryString(cml),6);//last swap performed here
+        return mrt + Tools.adjustLength(Integer.toBinaryString(cml), 6);//last swap performed here
     }
 
     //generate 4 keys of 8 bits starting from the key of 9 bits inserted
