@@ -101,6 +101,12 @@ public class S_DES {
             cml = Integer.parseInt(mrt, 2);//swaps the left part with the right one
             mrt = cmr;//swaps the right part with the left one
 
+            /*if(i==1)
+            {
+                Attack.setM1(Integer.toBinaryString(cml) + mrt);
+            }
+            */
+
             System.out.print("Round "+(i+1)+": ");
             Tools.printBits(Integer.parseInt(Integer.toBinaryString(cml) + mrt, 2), 12);
             System.out.print("\n");
