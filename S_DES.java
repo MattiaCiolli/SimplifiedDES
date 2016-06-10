@@ -20,12 +20,12 @@ public class S_DES {
 
 //getters and setters
 
-    public static void setSubK(int[] subK) {
-        SubK = subK;
+    public static int getSubK(int i) {
+        return SubK[i];
     }
 
-    public static void setSubK(int v, int p) {
-        SubK[p] = v;
+    public static void setSubK(int[] sk) {
+        SubK=sk;
     }
 
     public static String getCm() {
@@ -121,7 +121,7 @@ public class S_DES {
     //SDES-decrypts the cypher-text in input with the key in input. Variable number of rounds
     public static String decrypt(int k[], String m, int r) {
 
-        System.out.print("\n\nDecryption: \n");
+        //System.out.print("\n\nDecryption: \n");
         m = Tools.adjustLength(m, 12);// fixes eventually  zeroes lost in conversion
         String[] parts = Tools.splitText(m, m.length() / 2);//halves the cyphertext in input
         String mR1 = parts[0];//swaps right half with the left one (index 0->left part)
@@ -157,49 +157,33 @@ public class S_DES {
             cml = Integer.parseInt(mrt, 2);//swaps the left part with the right one
             mrt = cmr;//swaps the right part with the left one
 
-            System.out.print("Round " + (r - i) + ": ");
+            /*System.out.print("Round " + (r - i) + ": ");
             Tools.printBits(Integer.parseInt(Integer.toBinaryString(cml) + mrt, 2), 12);
-            System.out.print("\n");
+            System.out.print("\n");*/
 
         }
 
-        System.out.println("\nDecrypted message : ");
+        //System.out.println("\nDecrypted message : ");
         return mrt + Tools.adjustLength(Integer.toBinaryString(cml), 6);//last swap performed here
     }
 
     //generate 4 keys of 8 bits starting from the key of 9 bits inserted
     //performs a circular shift on the subkeys
-    public static void generateKeys(String k) {
+    public static int[] generateKeys(String k) {
 
+        int[] sk=new int[4];
         String[] partsK = Tools.splitText(k, 8); //takes the first 8 bits of K
         String k1 = partsK[0];
 
-        K = Integer.parseInt(k, 2);
+        sk[0] = Integer.parseInt(k1, 2);
 
-        SubK[0] = Integer.parseInt(k1, 2);
+        sk[1] = (sk[0] << 1) | (sk[0] >> 8);//K2=K1 circle-shifted
 
-        System.out.print("K: ");
-        Tools.printBits(K, 9);
-        System.out.print("\n");
+        sk[2] = (sk[1] << 1) | (sk[1] >> 8);//K3=K2 circle-shifted
 
-        System.out.print("K1: ");
-        Tools.printBits(SubK[0], 8);
-        System.out.print("\n");
+        sk[3] = (sk[2] << 1) | (sk[2] >> 8);//K4=K3 circle-shifted
 
-        System.out.print("K2: ");
-        SubK[1] = (SubK[0] << 1) | (SubK[0] >> 8);//K2=K1 circle-shifted
-        Tools.printBits(SubK[1], 8);
-        System.out.print("\n");
-
-        System.out.print("K3: ");
-        SubK[2] = (SubK[1] << 1) | (SubK[1] >> 8);//K3=K2 circle-shifted
-        Tools.printBits(SubK[2], 8);
-        System.out.print("\n");
-
-        System.out.print("K4: ");
-        SubK[3] = (SubK[2] << 1) | (SubK[2] >> 8);//K4=K3 circle-shifted
-        Tools.printBits(SubK[3], 8);
-        System.out.print("\n");
+        return sk;
 
     }
 

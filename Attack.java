@@ -24,18 +24,22 @@ public class Attack {
     }
 
 
-    /*public static String BruteForce(String m, String mo){
+    /*public static String BruteForce(String em, String mo){
 
-        int[] k=new int[512];;
-        int i=0;
+        int[] k=new int[4];
+        int sk=0;
+        String cm=em;
 
-        while(m!=mo){
+        while(cm!=mo){
+            System.out.print(Tools.adjustLength(Integer.toBinaryString(sk),9)+"\n");
+            k=S_DES.generateKeys(Tools.adjustLength(Integer.toBinaryString(sk),9));
 
-            k=S_DES.generateKeys();
-
-            String cm = S_DES.decrypt(k, mo, 4);
-            i++;
+            cm = S_DES.decrypt(k, em, 4);
+            sk++;
         }
+
+            return Tools.adjustLength(Integer.toBinaryString(sk),9);
+
     }*/
 
     public static String findKey(int k[]) {
@@ -65,6 +69,32 @@ public class Attack {
         parts = Tools.splitText(r4prl1pr, r4prl1pr.length() / 2);//output XOR of R4' XOR L1'
         String xlOUT = parts[0];//S1 output
         String xrOUT = parts[1];//S2 output
+
+
+        return "developing";
+    }
+
+    public static String findCouples(String s, String xorNeeded) {
+
+        String[] couple1=new String[15];
+        String[] couple2={"0000","0001","0010","0011","0100","0101","0110","0111","1000","1001","1010","1011","1100","1101","1110","1111"};
+        String[] xor=new String[15];
+        couple1[0]=s;
+
+        for(int i=0; i<16; i++)
+        {
+            couple1[i]=Integer.toBinaryString((Integer.parseInt(s, 2)) ^ Integer.parseInt(couple2[i], 2));
+            xor[i]=Integer.toBinaryString((Integer.parseInt(couple1[i], 2)) ^ Integer.parseInt(couple2[i], 2));
+        }
+
+        for(int i=0; i<16; i++)
+        {
+            if(xor[i]==xorNeeded){}
+            //salva le coppie trovate
+        }
+
+
+
 
 
         return "developing";

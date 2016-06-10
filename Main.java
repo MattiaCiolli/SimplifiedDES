@@ -27,6 +27,8 @@ public class Main {
             m = inp.readLine();
         }
 
+        S_DES.setK(Integer.parseInt(k, 2));
+
         String[] parts = Tools.splitText(m, m.length() / 2);
         String mL1 = parts[0];
         String mR1 = parts[1];
@@ -41,7 +43,27 @@ public class Main {
         Tools.printBits(mR, 6);
         System.out.print("\n\n");
 
-        S_DES.generateKeys(k);
+        S_DES.setSubK(S_DES.generateKeys(k));
+
+        System.out.print("K: ");
+        Tools.printBits(S_DES.getK(), 9);
+        System.out.print("\n");
+
+        System.out.print("K1: ");
+        Tools.printBits(S_DES.getSubK(0), 8);
+        System.out.print("\n");
+
+        System.out.print("K2: ");
+        Tools.printBits(S_DES.getSubK(1), 8);
+        System.out.print("\n");
+
+        System.out.print("K3: ");
+        Tools.printBits(S_DES.getSubK(2), 8);
+        System.out.print("\n");
+
+        System.out.print("K4: ");
+        Tools.printBits(S_DES.getSubK(3), 8);
+        System.out.print("\n");
 
         S_DES.setCm(S_DES.encrypt(S_DES.getSubK(), m, 4));//encrypt
 
@@ -51,5 +73,7 @@ public class Main {
 
         //Tools.printBits(Integer.parseInt(S_DES.decrypt(S_DES.getSubK(), "000111011011", 4), 2), 12);
         //Tools.printBits(Integer.parseInt(Attack.encryptForDC(S_DES.getSubK(), "000111011011", 3), 2), 12);
+
+        System.out.print(Attack.BruteForce(S_DES.getCm(), m));
     }
 }
