@@ -67,13 +67,16 @@ public class Main {
 
         S_DES.setCm(S_DES.encrypt(S_DES.getSubK(), m, 4));//encrypt
 
+        System.out.println("\nEncrypted message : ");
         Tools.printBits(Integer.parseInt(S_DES.getCm(), 2), 12);//encrypted message
 
+        System.out.println("\nDecrypted message : ");
         Tools.printBits(Integer.parseInt(S_DES.decrypt(S_DES.getSubK(), S_DES.getCm(), 4), 2), 12);//decrypt + decrypted message
 
         //Tools.printBits(Integer.parseInt(S_DES.decrypt(S_DES.getSubK(), "000111011011", 4), 2), 12);
         //Tools.printBits(Integer.parseInt(Attack.encryptForDC(S_DES.getSubK(), "000111011011", 3), 2), 12);
 
-        System.out.print(Attack.BruteForce(S_DES.getCm(), m));
+        System.out.println("\nKey found : ");
+        System.out.print(Attack.DifferentialCryptanalysys(S_DES.getM1()));
     }
 }

@@ -10,7 +10,7 @@ public class S_DES {
     private static String S2[][] = {{"100", "000", "110", "101", "111", "001", "011", "010"}, {"101", "011", "000", "111", "110", "010", "001", "100"}};
 
     private static int K;
-    private static String M, Cm;
+    private static String M, Cm, M1;
     private static int[] SubK = new int[4];
 
     public static int[] getSubK() {
@@ -38,6 +38,10 @@ public class S_DES {
 
     public static String getM() {
         return M;
+    }
+
+    public static String getM1() {
+        return M1;
     }
 
     public static void setM(String m) {
@@ -102,11 +106,11 @@ public class S_DES {
             cml = Integer.parseInt(mrt, 2);//swaps the left part with the right one
             mrt = cmr;//swaps the right part with the left one
 
-            /*if(i==1)
+            if(i==1)
             {
-                Attack.setM1(Integer.toBinaryString(cml) + mrt);
+                M1=Tools.adjustLength(Integer.toBinaryString(cml) + mrt, 12);
             }
-            */
+
 
             System.out.print("Round " + (i + 1) + ": ");
             Tools.printBits(Integer.parseInt(Integer.toBinaryString(cml) + mrt, 2), 12);
@@ -114,7 +118,6 @@ public class S_DES {
 
         }
 
-        System.out.println("\nEncrypted message : ");
         return Integer.toBinaryString(cml) + mrt;
     }
 
