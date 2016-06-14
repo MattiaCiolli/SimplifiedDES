@@ -1,5 +1,7 @@
 package SimplifiedDES;
 
+import java.util.Collections;
+
 /**
  * Created by mattia on 08/06/16.
  */
@@ -9,7 +11,7 @@ public class Attack {
 
     private static String[] C1,C2,C1$,C2$;
 
-    public static String[] getC1() {
+    public static Object[] getC1() {
         return C1;
     }
 
@@ -17,7 +19,7 @@ public class Attack {
         Attack.C1[i] = c;
     }
 
-    public static String[] getC2() {
+    public static Object[] getC2() {
         return C2;
     }
 
@@ -56,9 +58,6 @@ public class Attack {
 
     public static String DifferentialCryptanalysys(String m) {
 
-
-        String resultKeyL=new String();
-        String resultKeyR=new String();
         String[] parts = Tools.splitText(m, m.length() / 2);
         String mL1 = parts[0];
         String mR1 = parts[1];//takes the right part because R1*=R1
@@ -106,38 +105,84 @@ public class Attack {
         String xlOUT$ = parts[0];//S1 output
         String xrOUT$ = parts[1];//S2 output
 
-        C1=findCouples(xlIN, xlOUT);
-        C2=findCouples(xrIN, xrOUT);
+        Object[] c1=findCouples(xlIN, xlOUT);
+        Object[] c2=findCouples(xrIN, xrOUT);
 
-        C1$=findCouples(xlIN$, xlOUT$);
-        C2$=findCouples(xrIN$, xrOUT$);
-System.out.print(C1[0]+" "+C1[1]+" "+C2[0]+" "+C2[1]+" "+C1$[0]+" "+C1$[1]+" "+C2$[0]+" "+C2$[1]);
-        if(C1[0].equals(C1$[0]) || C1[0].equals(C1$[1]))
+        Object[] c1$=findCouples(xlIN$, xlOUT$);
+        Object[] c2$=findCouples(xrIN$, xrOUT$);
+
+        String[] tc1=(String[]) c1[0];
+        String[] tc12=(String[]) c1[1];
+        String[] tc2=(String[]) c2[0];
+        String[] tc22=(String[]) c2[1];
+        String[] tc1$=(String[]) c1$[0];
+        String[] tc12$=(String[]) c1$[1];
+        String[] tc2$=(String[]) c2$[0];
+        String[] tc22$=(String[]) c2$[1];
+
+        String firstBits=new String();
+        String lastBits=new String();
+
+        for(int i=0; i<tc1.length; i++)
         {
-            resultKeyL=C1[0];
-        }else {
-            if (C1[1].equals(C1$[0]) || C1[1].equals(C1$[1])) {
-                resultKeyL = C1[1];
+            System.out.print(tc1[i]+ " "+ tc12[i]+"\n");
+        }
+
+//System.out.print(C1[0]+" "+C1[1]+" "+C2[0]+" "+C2[1]+" "+C1$[0]+" "+C1$[1]+" "+C2$[0]+" "+C2$[1]);
+
+        for(int i=0; i<tc1.length; i++)
+        {
+            for (int j=0; j<tc1$.length; j++)
+            {
+                if (tc1[i].equals(tc1$[j]))
+                {
+                    if (tc12[i].equals(tc12$[j]))
+                    {
+                        firstBits = tc1[i];
+                    }
+
+                } else {
+                    if (tc12[i].equals(tc1$[j]))
+                    {
+                        if (tc1[i].equals(tc12$[j]))
+                        {
+                            firstBits = tc12[i];
+                        }
+                    }
+                }
             }
         }
 
-        if(C2[0].equals(C2$[0]) || C2[0].equals(C2$[1]))
+
+        for(int i=0; i<tc2.length; i++)
         {
-            resultKeyR=C2[0];
-        }else {
-            if (C2[1].equals(C2$[0]) || C2[1].equals(C2$[1])) {
-                resultKeyR = C2[1];
+            for (int j=0; j<tc2$.length; j++)
+            {
+
+                if (tc2[i].equals(tc2$[j])) {
+                    if (tc22[i].equals(tc22$[j])) {
+                        lastBits = tc1[i];
+                    }
+
+                } else {
+                    if (tc22[i].equals(tc2$[j])) {
+                        if (tc2[i].equals(tc22$[j])) {
+                            lastBits = tc22[i];
+                        }
+                    }
+                }
             }
         }
 
 
-        return resultKeyL+resultKeyR;
+
+
+        return firstBits+lastBits;
     }
 
 
-    public static String[] findCouples(String s, String xorNeeded) {
+    public static Object[] findCouples(String s, String xorNeeded) {
 
-        String[] couple={"", ""};
         String[] couple1=new String[16];
         String[] couple2={"0000","0001","0010","0011","0100","0101","0110","0111","1000","1001","1010","1011","1100","1101","1110","1111"};
         String[] xor=new String[16];
@@ -162,21 +207,29 @@ System.out.print(C1[0]+" "+C1[1]+" "+C2[0]+" "+C2[1]+" "+C1$[0]+" "+C1$[1]+" "+C
 
         }
 
+        String[] TCouple1=new String[couple1.length];
+        String[] TCouple2=new String[couple1.length];
         //System.out.print("s   "+s);
         //System.out.print("xor    "+xorNeeded);
-        for(int i=0; i<16; i++)
+        int j=0;
+        for(int i=0; i<couple1.length; i++)
         {//System.out.print("\n"+xor[i]);
+
             if(xor[i].equals(xorNeeded)){
 
-                couple[0]=couple1[i];
+                TCouple1[j]=couple1[i];
                 //System.out.print("\n"+couple[0]);
-                couple[1]=couple2[i];
+                TCouple2[j]=couple2[i];
 
+                j++;
             }
 
         }
 
-        return couple;
+        TCouple1=Tools.cleanString(TCouple1);
+        TCouple2=Tools.cleanString(TCouple2);
+
+        return new Object[]{TCouple1, TCouple2};
 
     }
 
