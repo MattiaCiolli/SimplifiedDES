@@ -7,9 +7,9 @@ import java.util.Collections;
  */
 public class Attack {
 
-    private static String M1$, M1$$;
+    private static String M1S, M1SS;
 
-    private static String[] C1,C2,C1$,C2$;
+    private static String[] C1,C2,C1S,C2S;
 
     public static Object[] getC1() {
         return C1;
@@ -28,12 +28,12 @@ public class Attack {
     }
 
 
-    public static String getM1$() {
-        return M1$;
+    public static String getM1S() {
+        return M1S;
     }
 
-    public static void setM1$(String m1$) {
-        M1$ = m1$;
+    public static void setM1S(String m1S) {
+        M1S = m1S;
     }
 
 
@@ -62,30 +62,30 @@ public class Attack {
         String mL1 = parts[0];
         String mR1 = parts[1];//takes the right part because R1*=R1
 
-        M1$ = "100100" + mR1;//L1.R1.
-        M1$$ = "111000" + mR1;//L1.R1.
+        M1S = "100100" + mR1;//L1.R1.
+        M1SS = "111000" + mR1;//L1.R1.
 
         parts = Tools.splitText(encryptForDC(S_DES.getSubK(), m, 3), 6);// encrypt L1R1
         String l4 = parts[0];//L4
         String r4 = parts[1];//R4
 
-        parts = Tools.splitText(encryptForDC(S_DES.getSubK(), M1$, 3), 6);// encrypt L1.R1.
-        String l4$ = parts[0];//L4.
-        String r4$ = parts[1];//R4.
+        parts = Tools.splitText(encryptForDC(S_DES.getSubK(), M1S, 3), 6);// encrypt L1.R1.
+        String l4S = parts[0];//L4.
+        String r4S = parts[1];//R4.
 
-        parts = Tools.splitText(encryptForDC(S_DES.getSubK(), M1$$, 3), 6);// encrypt L1..R1..
-        String l4$$ = parts[0];//L4..
-        String r4$$ = parts[1];//R4..
+        parts = Tools.splitText(encryptForDC(S_DES.getSubK(), M1SS, 3), 6);// encrypt L1..R1..
+        String l4SS = parts[0];//L4..
+        String r4SS = parts[1];//R4..
 
         //operations on first message
-        String El4Prime = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(Tools.expand(l4), 2) ^ Integer.parseInt(Tools.expand(l4$), 2)), 8);//E(L4')=E(L4) XOR E(L4.)
-        String r4Prime = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(r4, 2) ^ Integer.parseInt(r4$, 2)), 6);//R4'=R4*R4.
+        String El4Prime = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(Tools.expand(l4), 2) ^ Integer.parseInt(Tools.expand(l4S), 2)), 8);//E(L4')=E(L4) XOR E(L4.)
+        String r4Prime = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(r4, 2) ^ Integer.parseInt(r4S, 2)), 6);//R4'=R4*R4.
         String l1Prime = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(mL1, 2) ^ Integer.parseInt("100100", 2)), 6);//L1'
         String r4prl1pr = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(r4Prime, 2) ^ Integer.parseInt(l1Prime, 2)), 6);//R4' XOR L1'
 
         //operations on second message
-        String El4Second = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(Tools.expand(l4), 2) ^ Integer.parseInt(Tools.expand(l4$$), 2)), 8);//E(L4'')=E(L4) XOR E(L4..)
-        String r4Second = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(r4, 2) ^ Integer.parseInt(r4$$, 2)), 6);//R4''=R4*R4..
+        String El4Second = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(Tools.expand(l4), 2) ^ Integer.parseInt(Tools.expand(l4SS), 2)), 8);//E(L4'')=E(L4) XOR E(L4..)
+        String r4Second = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(r4, 2) ^ Integer.parseInt(r4SS, 2)), 6);//R4''=R4*R4..
         String l1Second = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(mL1, 2) ^ Integer.parseInt("111000", 2)), 6);//L1''
         String r4secl1sec = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(r4Second, 2) ^ Integer.parseInt(l1Second, 2)), 6);//R4'' XOR L1''
 
@@ -98,121 +98,161 @@ public class Attack {
         String xrOUT = parts[1];//S2 output
 
         parts = Tools.splitText(El4Second, El4Second.length() / 2);//input XOR of E(L4'')
-        String xlIN$ = parts[0];//S1 input
-        String xrIN$ = parts[1];//S2 input
+        String xlINS = parts[0];//S1 input second message
+        String xrINS = parts[1];//S2 input second message
 
         parts = Tools.splitText(r4secl1sec, r4secl1sec.length() / 2);//output XOR of R4'' XOR L1''
-        String xlOUT$ = parts[0];//S1 output
-        String xrOUT$ = parts[1];//S2 output
+        String xlOUTS = parts[0];//S1 output second message
+        String xrOUTS = parts[1];//S2 output second message
 
-        Object[] c1=findCouples(xlIN, xlOUT);
-        Object[] c2=findCouples(xrIN, xrOUT);
+        Object[] c1=findCouples(xlIN, xlOUT, true);//couples with the output needed for first bits. Xor with Second message
+        Object[] c2=findCouples(xrIN, xrOUT, false);//couples with the output needed for first bits. Xor with Second message
 
-        Object[] c1$=findCouples(xlIN$, xlOUT$);
-        Object[] c2$=findCouples(xrIN$, xrOUT$);
+        Object[] c1S=findCouples(xlINS, xlOUTS, true);//couples with the output needed for first bits. Xor with Third message
+        Object[] c2S=findCouples(xrINS, xrOUTS, false);//couples with the output needed for first bits. Xor with Third message
 
+        //couples left bits 1
         String[] tc1=(String[]) c1[0];
         String[] tc12=(String[]) c1[1];
+
+        //couples right bits 1
         String[] tc2=(String[]) c2[0];
         String[] tc22=(String[]) c2[1];
-        String[] tc1$=(String[]) c1$[0];
-        String[] tc12$=(String[]) c1$[1];
-        String[] tc2$=(String[]) c2$[0];
-        String[] tc22$=(String[]) c2$[1];
+
+        //couples left bits 2
+        String[] tc1S=(String[]) c1S[0];
+        String[] tc12S=(String[]) c1S[1];
+
+        //couples right bits 2
+        String[] tc2S=(String[]) c2S[0];
+        String[] tc22S=(String[]) c2S[1];
 
         String firstBits=new String();
         String lastBits=new String();
 
+        System.out.print(xlINS+ " xors "+ xrINS+"\n");
+        System.out.print(xlOUTS+ " xors "+ xrOUTS+"\n");
+
         for(int i=0; i<tc1.length; i++)
         {
-            System.out.print(tc1[i]+ " "+ tc12[i]+"\n");
+            System.out.print(tc1[i]+ " tc1 "+ tc12[i]+"\n");
         }
 
-//System.out.print(C1[0]+" "+C1[1]+" "+C2[0]+" "+C2[1]+" "+C1$[0]+" "+C1$[1]+" "+C2$[0]+" "+C2$[1]);
+        for(int i=0; i<tc2.length; i++)
+        {
+            System.out.print(tc2[i]+ " tc2 "+ tc22[i]+"\n");
+        }
+        for(int i=0; i<tc1S.length; i++)
+        {
+            System.out.print(tc1S[i]+ " tc1S "+ tc12S[i]+"\n");
+        }
+        for(int i=0; i<tc2S.length; i++)
+        {
+            System.out.print(tc2S[i]+ " tc2S "+ tc22S[i]+"\n");
+        }
+
+//System.out.print(C1[0]+" "+C1[1]+" "+C2[0]+" "+C2[1]+" "+C1S[0]+" "+C1S[1]+" "+C2S[0]+" "+C2S[1]);
 
         for(int i=0; i<tc1.length; i++)
         {
-            for (int j=0; j<tc1$.length; j++)
+            for (int j=0; j<tc1S.length; j++)
             {
-                if (tc1[i].equals(tc1$[j]))
+                if (tc1[i].equals(tc1S[j]))
                 {
-                    if (tc12[i].equals(tc12$[j]))
-                    {
-                        firstBits = tc1[i];
-                    }
+                    firstBits = tc1[i];
 
-                } else {
-                    if (tc12[i].equals(tc1$[j]))
-                    {
-                        if (tc1[i].equals(tc12$[j]))
-                        {
-                            firstBits = tc12[i];
-                        }
-                    }
+                }
+
+                if (tc1[i].equals(tc12S[j]))
+                {
+                    firstBits = tc1[i];
+                }
+
+                if (tc12[i].equals(tc1S[j]))
+                {
+                    firstBits = tc12[i];
+                }
+
+                if (tc12[i].equals(tc12S[j]))
+                {
+                    firstBits = tc12[i];
                 }
             }
         }
+
 
 
         for(int i=0; i<tc2.length; i++)
         {
-            for (int j=0; j<tc2$.length; j++)
+            for (int j=0; j<tc2S.length; j++)
             {
+                if (tc2[i].equals(tc2S[j]))
+                {
+                    lastBits = tc2[i];
 
-                if (tc2[i].equals(tc2$[j])) {
-                    if (tc22[i].equals(tc22$[j])) {
-                        lastBits = tc1[i];
-                    }
+                }
 
-                } else {
-                    if (tc22[i].equals(tc2$[j])) {
-                        if (tc2[i].equals(tc22$[j])) {
-                            lastBits = tc22[i];
-                        }
-                    }
+                if (tc2[i].equals(tc22S[j]))
+                {
+                    lastBits = tc2[i];
+                }
+
+                if (tc22[i].equals(tc2S[j]))
+                {
+                    lastBits = tc22[i];
+                }
+
+                if (tc22[i].equals(tc22S[j]))
+                {
+                    lastBits = tc22[i];
                 }
             }
         }
-
-
-
 
         return firstBits+lastBits;
     }
 
 
-    public static Object[] findCouples(String s, String xorNeeded) {
+    public static Object[] findCouples(String s, String xorNeeded, boolean sbox) {
 
         String[] couple1=new String[16];
         String[] couple2={"0000","0001","0010","0011","0100","0101","0110","0111","1000","1001","1010","1011","1100","1101","1110","1111"};
         String[] xor=new String[16];
 
         s=Tools.adjustLength(s, 4);
+        xorNeeded=Tools.adjustLength(xorNeeded, 3);
 
         for(int i=0; i<16; i++)
         {
             couple1[i]=Tools.adjustLength(Integer.toBinaryString((Integer.parseInt(s, 2)) ^ Integer.parseInt(couple2[i], 2)),4);
 
-            //S1 coordinates (row first bit, column last 3 bits)
-            String [] parts = Tools.splitText(couple1[i], 1); //halves string
+            //S1/S2 coordinates (row first bit, column last 3 bits)
+            String [] parts = Tools.splitText(couple1[i], 1); //splits string
             String S1row = parts[0];
             String S1col = parts[1];
 
-            //S2 coordinates (row first bit, column last 3 bits)
-            parts = Tools.splitText(couple2[i], 1); //halves string
+            //second S1/S2 coordinates (row first bit, column last 3 bits)
+            parts = Tools.splitText(couple2[i], 1); //splits string
             String S11row = parts[0];
             String S11col = parts[1];
 
-            xor[i]= Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(S_DES.getS1((Integer.parseInt(S1row, 2)), (Integer.parseInt(S1col, 2))), 2)^ Integer.parseInt(S_DES.getS1((Integer.parseInt(S11row, 2)), (Integer.parseInt(S11col, 2))), 2)), 3);//3 bits given by S1
+            if(sbox==true) {
+                xor[i] = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(S_DES.getS1((Integer.parseInt(S1row, 2)), (Integer.parseInt(S1col, 2))), 2) ^ Integer.parseInt(S_DES.getS1((Integer.parseInt(S11row, 2)), (Integer.parseInt(S11col, 2))), 2)), 3);//3 bits given by S1
+            }
+            else {
+                if (sbox == false) {
+                    xor[i] = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(S_DES.getS2((Integer.parseInt(S1row, 2)), (Integer.parseInt(S1col, 2))), 2) ^ Integer.parseInt(S_DES.getS2((Integer.parseInt(S11row, 2)), (Integer.parseInt(S11col, 2))), 2)), 3);//3 bits given by S1
+                }
+            }
 
         }
 
-        String[] TCouple1=new String[couple1.length];
-        String[] TCouple2=new String[couple1.length];
+        String[] TCouple1=new String[16];
+        String[] TCouple2=new String[16];
         //System.out.print("s   "+s);
         //System.out.print("xor    "+xorNeeded);
         int j=0;
-        for(int i=0; i<couple1.length; i++)
+        for(int i=0; i<16; i++)
         {//System.out.print("\n"+xor[i]);
 
             if(xor[i].equals(xorNeeded)){
