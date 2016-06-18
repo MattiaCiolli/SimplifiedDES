@@ -1,6 +1,7 @@
 package SimplifiedDES;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by mattia on 03/06/16.
@@ -68,7 +69,7 @@ public class Tools {
     //cleans null elements in strings
     public static String[] cleanString(String[] a) {
 
-        ArrayList<String> removed= new ArrayList<String>();
+        ArrayList<String> removed = new ArrayList<String>();
         for (String str : a)
             if (str != null)
                 removed.add(str);

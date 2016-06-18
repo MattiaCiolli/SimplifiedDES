@@ -7,10 +7,10 @@ public class S_DES {
 
 
     private static String S1[][] = {{"101", "010", "001", "110", "011", "100", "111", "000"},
-                                    {"001", "100", "110", "010", "000", "111", "101", "011"}};
+            {"001", "100", "110", "010", "000", "111", "101", "011"}};
 
     private static String S2[][] = {{"100", "000", "110", "101", "111", "001", "011", "010"},
-                                    {"101", "011", "000", "111", "110", "010", "001", "100"}};
+            {"101", "011", "000", "111", "110", "010", "001", "100"}};
 
     private static int K;
     private static String M, Cm, M1;
@@ -23,12 +23,12 @@ public class S_DES {
 
 //getters and setters
 
-    public static int getSubK(int i) {
-        return SubK[i];
+    public static void setSubK(int[] sk) {
+        SubK = sk;
     }
 
-    public static void setSubK(int[] sk) {
-        SubK=sk;
+    public static int getSubK(int i) {
+        return SubK[i];
     }
 
     public static String getCm() {
@@ -43,12 +43,12 @@ public class S_DES {
         return M;
     }
 
-    public static String getM1() {
-        return M1;
-    }
-
     public static void setM(String m) {
         M = m;
+    }
+
+    public static String getM1() {
+        return M1;
     }
 
     public static int getK() {
@@ -109,11 +109,9 @@ public class S_DES {
             cml = Integer.parseInt(mrt, 2);//swaps the left part with the right one
             mrt = cmr;//swaps the right part with the left one
 
-            if(i==1)
-            {
-                M1=Tools.adjustLength(Integer.toBinaryString(cml) + mrt, 12);
+            if (i == 1) {
+                M1 = Tools.adjustLength(Integer.toBinaryString(cml) + mrt, 12);
             }
-
 
             System.out.print("Round " + (i + 1) + ": ");
             Tools.printBits(Integer.parseInt(Integer.toBinaryString(cml) + mrt, 2), 12);
@@ -177,17 +175,23 @@ public class S_DES {
     //performs a circular shift on the subkeys
     public static int[] generateKeys(String k) {
 
-        int[] sk=new int[4];
+        int[] sk = new int[4];
         String[] partsK = Tools.splitText(k, 8); //takes the first 8 bits of K
         String k1 = partsK[0];
 
         sk[0] = Integer.parseInt(k1, 2);
 
-        sk[1] = (sk[0] << 1) | (sk[0] >> 8);//K2=K1 circle-shifted
+        partsK = Tools.splitText(k, 1);
+        k1 = partsK[1];
+        sk[1] = Integer.parseInt(k1, 2);//K2=K from second bit
 
-        sk[2] = (sk[1] << 1) | (sk[1] >> 8);//K3=K2 circle-shifted
+        partsK = Tools.splitText(k, 2);
+        k1 = partsK[1] + k.charAt(0);
+        sk[2] = Integer.parseInt(k1, 2);//K3=K from third bit+first bit
 
-        sk[3] = (sk[2] << 1) | (sk[2] >> 8);//K4=K3 circle-shifted
+        partsK = Tools.splitText(k, 3);
+        k1 = partsK[1] + k.charAt(0) + k.charAt(1);
+        sk[3] = Integer.parseInt(k1, 2);//K4=K from fourth bit+first bit+second bit
 
         return sk;
 

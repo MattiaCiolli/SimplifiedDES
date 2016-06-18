@@ -75,8 +75,11 @@ public class Main {
 
         //Tools.printBits(Integer.parseInt(S_DES.decrypt(S_DES.getSubK(), "000111011011", 4), 2), 12);
         //Tools.printBits(Integer.parseInt(Attack.encryptForDC(S_DES.getSubK(), "000111011011", 3), 2), 12);
-
+        System.out.println("\n"+S_DES.getM1());
         System.out.println("\nKey found : ");
         System.out.print(Attack.DifferentialCryptanalysys(S_DES.getM1()));
+
+        System.out.println("\nKey found : ");
+        System.out.print(Attack.BruteForce(S_DES.getCm(), m));
     }
 }
