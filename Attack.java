@@ -1,5 +1,5 @@
 package SimplifiedDES;
-
+import java.util.Arrays;
 /**
  * Created by mattia on 08/06/16.
  */
@@ -92,10 +92,16 @@ public class Attack {
         String r4prl1pr = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(r4Prime, 2) ^ Integer.parseInt(l1Prime, 2)), 6); // R4' XOR L1', XOr of outputs
 
         // operations on second message
-        String El4Second = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(Tools.expand(l4SS), 2) ^ Integer.parseInt(Tools.expand(l4SSS), 2)), 8); // E(L4'')=E(L4) XOR E(L4...), XOR inputs
-        String r4Second = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(r4SS, 2) ^ Integer.parseInt(r4SSS, 2)), 6); // R4''=R4*R4...
-        String l1Second = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt("111000", 2) ^ Integer.parseInt("000001", 2)), 6); // L1''
+        String El4Second = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(Tools.expand(l4), 2) ^ Integer.parseInt(Tools.expand(l4SS), 2)), 8); // E(L4'')=E(L4) XOR E(L4..), XOR inputs
+        String r4Second = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(r4, 2) ^ Integer.parseInt(r4SS, 2)), 6); // R4''=R4*R4..
+        String l1Second = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(mL1, 2) ^ Integer.parseInt("111000", 2)), 6); // L1''
         String r4secl1sec = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(r4Second, 2) ^ Integer.parseInt(l1Second, 2)), 6); // R4'' XOR L1'', XOR of outputs
+
+        // operations on third message
+        String El4Third = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(Tools.expand(l4), 2) ^ Integer.parseInt(Tools.expand(l4SSS), 2)), 8); // E(L4''')=E(L4) XOR E(L4...), XOR inputs
+        String r4Third = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(r4, 2) ^ Integer.parseInt(r4SSS, 2)), 6); // R4'''=R4*R4...
+        String l1Third = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(mL1, 2) ^ Integer.parseInt("000001", 2)), 6); // L1'''
+        String r4thil1thi = Tools.adjustLength(Integer.toBinaryString(Integer.parseInt(r4Third, 2) ^ Integer.parseInt(l1Third, 2)), 6); // R4''' XOR L1''', XOR of outputs
 
 
         parts = Tools.splitText(El4Prime, El4Prime.length() / 2); // input XOR of E(L4')
@@ -114,11 +120,22 @@ public class Attack {
         String xlOUTS = parts[0]; // S1 output second message
         String xrOUTS = parts[1]; // S2 output second message
 
+        parts = Tools.splitText(El4Third, El4Third.length() / 2); // input XOR of E(L4''')
+        String xlINSS = parts[0]; // S1 input third message
+        String xrINSS = parts[1]; // S2 input third message
+
+        parts = Tools.splitText(r4thil1thi, r4thil1thi.length() / 2); // output XOR of R4''' XOR L1'''
+        String xlOUTSS = parts[0]; // S1 output third message
+        String xrOUTSS = parts[1]; // S2 output third message
+
         Object[] c1 = findCouples(xlIN, xlOUT, true); // couples with the output needed for first bits. Xor with Second message
         Object[] c2 = findCouples(xrIN, xrOUT, false); // couples with the output needed for last bits. Xor with Second message
 
         Object[] c1S = findCouples(xlINS, xlOUTS, true); // couples with the output needed for first bits. Xor with Third message
         Object[] c2S = findCouples(xrINS, xrOUTS, false); // couples with the output needed for last bits. Xor with Third message
+
+        Object[] c1SS = findCouples(xlINSS, xlOUTSS, true); // couples with the output needed for first bits. Xor with fourth message
+        Object[] c2SS = findCouples(xrINSS, xrOUTSS, false); // couples with the output needed for last bits. Xor with fourth message
 
         // couples left bits 1
         String[] tc1 = (String[]) c1[0];
@@ -136,53 +153,94 @@ public class Attack {
         String[] tc2S = (String[]) c2S[0];
         String[] tc22S = (String[]) c2S[1];
 
-        String firstBits = new String();
-        String lastBits = new String();
+        // couples left bits 3
+        String[] tc1SS = (String[]) c1SS[0];
+        String[] tc12SS = (String[]) c1SS[1];
 
-        System.out.print(xlINS + " xors " + xrINS + "\n");
-        System.out.print(xlOUTS + " xors " + xrOUTS + "\n");
-        System.out.print(xlIN + " xor " + xrIN + "\n");
-        System.out.print(xlOUT + " xor " + xrOUT + "\n");
+        // couples right bits 3
+        String[] tc2SS = (String[]) c2SS[0];
+        String[] tc22SS = (String[]) c2SS[1];
 
-        for (int i = 0; i < tc1.length; i++) {
-            System.out.print(tc1[i] + " tc1 " + tc12[i] + "\n");
-        }
+        String[] firstBits1 = new String[16];
+        String[] lastBits1 = new String[16];
+        String[] firstBits2 = new String[16];
+        String[] lastBits2 = new String[16];
 
-        for (int i = 0; i < tc2.length; i++) {
-            System.out.print(tc2[i] + " tc2 " + tc22[i] + "\n");
-        }
-        for (int i = 0; i < tc1S.length; i++) {
-            System.out.print(tc1S[i] + " tc1S " + tc12S[i] + "\n");
-        }
-        for (int i = 0; i < tc2S.length; i++) {
-            System.out.print(tc2S[i] + " tc2S " + tc22S[i] + "\n");
-        }
-        // System.out.print(C1[0]+" "+C1[1]+" "+C2[0]+" "+C2[1]+" "+C1S[0]+" "+C1S[1]+" "+C2S[0]+" "+C2S[1]);
-
+        int k=0;
         for (int i = 0; i < tc1.length; i++) {
             for (int j = 0; j < tc1S.length; j++) {
 
                 if (tc1[i].equals(tc1S[j])) {
 
-                    firstBits = tc1[i];
-
+                    firstBits1[k] = tc1[i];
+                    k++;
                 }
             }
         }
 
-
+        k=0;
         for (int i = 0; i < tc2.length; i++) {
             for (int j = 0; j < tc2S.length; j++) {
 
                 if (tc2[i].equals(tc2S[j])) {
 
-                    lastBits = tc2[i];
-
+                    lastBits1[k] = tc2[i];
+                    k++;
                 }
             }
         }
 
-        return firstBits + lastBits;
+        k=0;
+        for (int i = 0; i < tc1.length; i++) {
+            for (int j = 0; j < tc1SS.length; j++) {
+
+                if (tc1[i].equals(tc1SS[j])) {
+
+                    firstBits2[k] = tc1[i];
+                    k++;
+                }
+            }
+        }
+
+        k=0;
+        for (int i = 0; i < tc2.length; i++) {
+            for (int j = 0; j < tc2SS.length; j++) {
+
+                if (tc2[i].equals(tc2SS[j])) {
+
+                    lastBits2[k] = tc2[i];
+                    k++;
+                }
+            }
+        }
+
+        firstBits1=Tools.cleanString(firstBits1);
+        firstBits2=Tools.cleanString(firstBits2);
+        lastBits1=Tools.cleanString(lastBits1);
+        lastBits2=Tools.cleanString(lastBits2);
+
+        /*for(int i=0;i<firstBits1.length;i++) {
+            System.out.print(firstBits1[i]+" ");
+        }
+        System.out.print("\n");
+        for(int i=0;i<lastBits1.length;i++) {
+            System.out.print(lastBits1[i]+" ");
+        }
+        System.out.print("\n");
+        for(int i=0;i<firstBits2.length;i++) {
+            System.out.print(firstBits2[i]+" ");
+        }
+        System.out.print("\n");
+        for(int i=0;i<lastBits2.length;i++) {
+            System.out.print(lastBits2[i]+" ");
+        }*/
+
+        String[] firsts = Tools.concatenate(firstBits1, firstBits2);
+        String[] seconds = Tools.concatenate(lastBits1, lastBits2);
+
+
+
+        return testKey(firsts, seconds, m, encryptForDC(S_DES.getSubK(), m, 3));
     }
 
 
@@ -227,9 +285,9 @@ public class Attack {
 
         int j = 0;
         for (int i = 0; i < 16; i++) {
-            System.out.print(xor[i]+ " i "+i+"\n");
+            //System.out.print(xor[i]+ " i "+i+"\n");
             if (xor[i].equals(xorNeeded)) {
-                System.out.print(xor[i]+ " j "+j+"\n");
+                //System.out.print(xor[i]+ " j "+j+"\n");
                 TCouple1[j] = couple1[i];
                 TCouple2[j] = couple2[i];
                 j++;
@@ -287,5 +345,73 @@ public class Attack {
         }
 
         return Tools.adjustLength(Integer.toBinaryString(cml) + mrt, 12);
+    }
+
+    //SDES-decrypts the cypher-text in input with the key in input. Variable number of rounds
+    public static String decryptforDC(int k[], String m, int r) {
+
+        m = Tools.adjustLength(m, 12);// fixes eventually  zeroes lost in conversion
+        String[] parts = Tools.splitText(m, m.length() / 2);//halves the cyphertext in input
+        String mR1 = parts[0];//swaps right half with the left one (index 0->left part)
+        String mL1 = parts[1];//swaps the left part with the right one (index 1->right part)
+
+        String mrt = mR1;//initial initialization
+        int cml = Integer.parseInt(mL1, 2);
+
+        for (int i = r - 1; i > 0; i--) {
+
+            String cmr = Integer.toBinaryString(Integer.parseInt(Tools.expand(mrt), 2) ^ k[i]);//left half expanded and XORed with the r-i-th key
+
+            cmr = Tools.adjustLength(cmr, 8);// fixes eventually  zeroes lost in conversion
+            parts = Tools.splitText(cmr, cmr.length() / 2);//halves string
+
+            //strings used to calculate the S-BOXES coordinates (left and right half of the expanded and XORed part)
+            String XL = parts[0];
+            String XR = parts[1];
+
+            //S1 coordinates (row first bit, column last 3 bits)
+            parts = Tools.splitText(XL, 1); //halves string
+            String S1row = parts[0];
+            String S1col = parts[1];
+
+            //S2 coordinates (row first bit, column last 3 bits)
+            parts = Tools.splitText(XR, 1); //halves string
+            String S2row = parts[0];
+            String S2col = parts[1];
+
+            String SResult = S_DES.getS1((Integer.parseInt(S1row, 2)), (Integer.parseInt(S1col, 2))) + S_DES.getS2((Integer.parseInt(S2row, 2)), (Integer.parseInt(S2col, 2)));//6 bits given by the S-BOXES
+            cmr = Integer.toBinaryString(Integer.parseInt(SResult, 2) ^ cml);
+            cmr = Tools.adjustLength(cmr, 6);// fixes eventually  zeroes lost in conversion
+            cml = Integer.parseInt(mrt, 2);//swaps the left part with the right one
+            mrt = cmr;//swaps the right part with the left one
+
+        }
+
+        return mrt + Tools.adjustLength(Integer.toBinaryString(cml), 6);//last swap performed here
+    }
+
+    public static String testKey(String[] firsts, String[] seconds, String m, String cm) {
+
+        String kp=new String();
+        for (int i = 0; i < firsts.length; i++) {
+            for (int j = 0; j < seconds.length; j++) {
+                String key4 = firsts[i] + seconds[j];
+                String possibleK = Tools.adjustLength(Integer.toBinaryString(0 + key4.charAt(7) + key4.charAt(6) + key4.charAt(0) + key4.charAt(1) + key4.charAt(2) + key4.charAt(3) + key4.charAt(4) + key4.charAt(5)), 8);
+
+                System.out.print(possibleK);
+                S_DES.generateKeys(possibleK+"\n");
+                if (Attack.decryptforDC(S_DES.getSubK(), cm, 4).equals(m)) {
+                    kp= possibleK;
+                } else {
+                    String possibleK2 = Tools.adjustLength(Integer.toBinaryString(1 + key4.charAt(7) + key4.charAt(6) + key4.charAt(0) + key4.charAt(1) + key4.charAt(2) + key4.charAt(3) + key4.charAt(4) + key4.charAt(5)), 8);
+                    S_DES.generateKeys(possibleK2+"\n");
+                    System.out.print(possibleK2);
+                    if (Attack.decryptforDC(S_DES.getSubK(), cm, 4).equals(m)) {
+                        kp= possibleK2;
+                    }
+                }
+            }
+        }
+        return kp;
     }
 }
