@@ -11,28 +11,18 @@ public class Main {
     public static void main(String args[]) throws Exception {
 
         BufferedReader inp = new BufferedReader(new InputStreamReader(System.in));
-        boolean b=true;
-        while(b) {
+        boolean b = true;
+        while (b) {
 
-            System.out.println("Select action :\n1)S-DES demo (encrypt, decrypt, brute force attack and differential cryptanalysis)\n2)Encrypt a message\n3)Decrypt a message\n4)Brute force attack\n5)Differential cryptanalysis\n\ninsert q to quit\n");
+            System.out.println("Select action :\n1)S-DES demo (encrypt, decrypt, brute force attack and differential cryptanalysis)\n2)Encrypt a message\n3)Decrypt a message\n\ninsert q to quit\n");
 
             switch (inp.readLine()) {
+
                 case "1": {
-                    System.out.println("\nS-DES demo\n");
-                    System.out.println("Enter the 9 Bits Key :");
-                    String k = inp.readLine();
-                    while (k.length() != 9) {
-                        System.out.println("Key must be of 9 Bits :");
-                        k = inp.readLine();
-                    }
+                    System.out.println("\nS-DES demo\n\nKey= 111000111\nMessage= 100010110101\n");
 
-                    System.out.println("Enter the 12 Bits message :");
-                    String m = inp.readLine();
-
-                    while (m.length() != 12) {
-                        System.out.println("Message must be of 12 Bits :");
-                        m = inp.readLine();
-                    }
+                    String m = "100010110101";
+                    String k = "111000111";
 
                     S_DES.setK(Integer.parseInt(k, 2));
 
@@ -72,19 +62,18 @@ public class Main {
                     Tools.printBits(S_DES.getSubK(3), 8);
                     System.out.print("\n");
 
-                    S_DES.setCm(S_DES.encrypt(S_DES.getSubK(), m, 4));//encrypt
+                    S_DES.setCm(S_DES.encrypt(S_DES.getSubK(), m, 4)); // encrypt
 
                     System.out.println("\nEncrypted message : ");
-                    Tools.printBits(Integer.parseInt(S_DES.getCm(), 2), 12);//encrypted message
+                    Tools.printBits(Integer.parseInt(S_DES.getCm(), 2), 12); // encrypted message
 
-                    System.out.println("\nDecrypted message : ");
-                    Tools.printBits(Integer.parseInt(S_DES.decrypt(S_DES.getSubK(), S_DES.getCm(), 4), 2), 12);//decrypt + decrypted message
+                    System.out.println("\n\nDecrypted message : ");
+                    Tools.printBits(Integer.parseInt(S_DES.decrypt(S_DES.getSubK(), S_DES.getCm(), 4), 2), 12); // decrypt + decrypted message
 
-                    System.out.println("\nKey found : ");
-                    System.out.print(Attack.DifferentialCryptanalysys(S_DES.getM1()));
+                    System.out.println("\n");
+                    System.out.print(Attack.DifferentialCryptanalysis(S_DES.getM1())); // DifferentialCryptanalysis
 
-                    System.out.println("\nKey found : ");
-                    System.out.print(Attack.BruteForce(S_DES.getCm(), m));
+                    System.out.print(Attack.BruteForce(S_DES.getCm(), m)); // Brute force
                     System.out.println("\n");
 
                     break;
@@ -145,10 +134,10 @@ public class Main {
                     Tools.printBits(S_DES.getSubK(3), 8);
                     System.out.print("\n");
 
-                    S_DES.setCm(S_DES.encrypt(S_DES.getSubK(), m, 4));//encrypt
+                    S_DES.setCm(S_DES.encrypt(S_DES.getSubK(), m, 4)); // encrypt
 
                     System.out.println("\nEncrypted message : ");
-                    Tools.printBits(Integer.parseInt(S_DES.getCm(), 2), 12);//encrypted message
+                    Tools.printBits(Integer.parseInt(S_DES.getCm(), 2), 12); // encrypted message
                     System.out.println("\n");
 
                     break;
@@ -210,66 +199,20 @@ public class Main {
                     System.out.print("\n");
 
                     System.out.println("\nDecrypted message : ");
-                    Tools.printBits(Integer.parseInt(S_DES.decrypt(S_DES.getSubK(), m, 4), 2), 12);//decrypt + decrypted message
-                    System.out.println("\n");
-
-                    break;
-                }
-
-                case "4": {
-                    System.out.println("\nBrute force attack\n");
-                    System.out.println("Enter the 12 Bits CypherText :");
-                    String cm = inp.readLine();
-                    while (cm.length() != 12) {
-                        System.out.println("CypherText must be of 12 Bits :");
-                        cm = inp.readLine();
-                    }
-
-                    System.out.println("Enter the 12 Bits original message :");
-                    String m = inp.readLine();
-
-                    while (m.length() != 12) {
-                        System.out.println("Original message must be of 12 Bits :");
-                        m = inp.readLine();
-                    }
-
-                    System.out.println("\nKey found : ");
-                    System.out.print(Attack.BruteForce(cm, m));
-                    System.out.println("\n");
-
-                    break;
-                }
-
-                case "5": {
-                    System.out.println("\nDifferential CryptAnalysis\n");
-                    System.out.println("Enter the 12 Bits first round CypherText:");
-                    String cm = inp.readLine();
-                    while (cm.length() != 12) {
-                        System.out.println("CypherText must be of 12 Bits :");
-                        cm = inp.readLine();
-                    }
-
-                    System.out.println("Enter the 9 Bits Key of the machine:");
-                    String k = inp.readLine();
-                    while (k.length() != 9) {
-                        System.out.println("Key must be of 9 Bits :");
-                        k = inp.readLine();
-                    }
-
-                    S_DES.encrypt(S_DES.getSubK(), cm, 4);
-                    System.out.println("\nKey found : ");
-                    System.out.print(Attack.DifferentialCryptanalysys(S_DES.getM1()));
+                    Tools.printBits(Integer.parseInt(S_DES.decrypt(S_DES.getSubK(), m, 4), 2), 12); // decrypt + decrypted message
                     System.out.println("\n");
 
                     break;
                 }
 
                 case "q":
-                    b=false;
+                    b = false;
                     break;
 
             }
         }
-System.out.print("end");
+
+        System.out.print("end");
+
     }
 }

@@ -1,39 +1,11 @@
 package SimplifiedDES;
-import java.util.Arrays;
+
 /**
  * Created by mattia on 08/06/16.
  */
 public class Attack {
 
     private static String M1S, M1SS, M1SSS;
-
-    private static String[] C1, C2, C1S, C2S;
-
-    public static Object[] getC1() {
-        return C1;
-    }
-
-    public static void setC1(String c, int i) {
-        Attack.C1[i] = c;
-    }
-
-    public static Object[] getC2() {
-        return C2;
-    }
-
-    public static void setC2(String c, int i) {
-        Attack.C2[i] = c;
-    }
-
-
-    public static String getM1S() {
-        return M1S;
-    }
-
-    public static void setM1S(String m1S) {
-        M1S = m1S;
-    }
-
 
     // performs a brute force attack to find the key starting from k=0
     public static String BruteForce(String encm, String origm) {
@@ -43,6 +15,7 @@ public class Attack {
         String cm = encm;
         int i = 1;
 
+        // if the decrypted message not equals the original, increase the key of 1 e repeat
         while (!cm.equals(origm)) {
 
             sk++;
@@ -52,24 +25,24 @@ public class Attack {
 
         }
 
-        System.out.print("Key found in " + i + " iteractions: ");
+        System.out.print("\nKey found by brute force in " + i + " iteractions: ");
 
         return Tools.adjustLength(Integer.toBinaryString(sk), 9);
 
     }
 
-    public static String DifferentialCryptanalysys(String m) {
+    public static String DifferentialCryptanalysis(String m) {
 
         String[] parts = Tools.splitText(m, m.length() / 2);
         String mL1 = parts[0];
         String mR1 = parts[1]; // takes the right part because R1*=R1
 
         M1S = "100100" + mR1; // L1.R1.
-
         M1SS = "111000" + mR1; // L1..R1..
         M1SSS = "000001" + mR1; // L1...R1...
 
-        parts = Tools.splitText(encryptForDC(S_DES.getSubK(), m, 3), 6); // encrypt L1R1
+        String cm = encryptForDC(S_DES.getSubK(), m, 3);
+        parts = Tools.splitText(cm, 6); // encrypt L1R1
         String l4 = parts[0]; // L4
         String r4 = parts[1]; // R4
 
@@ -166,7 +139,8 @@ public class Attack {
         String[] firstBits2 = new String[16];
         String[] lastBits2 = new String[16];
 
-        int k=0;
+        // for loops to check if there are some couples in common
+        int k = 0;
         for (int i = 0; i < tc1.length; i++) {
             for (int j = 0; j < tc1S.length; j++) {
 
@@ -178,7 +152,7 @@ public class Attack {
             }
         }
 
-        k=0;
+        k = 0;
         for (int i = 0; i < tc2.length; i++) {
             for (int j = 0; j < tc2S.length; j++) {
 
@@ -190,7 +164,7 @@ public class Attack {
             }
         }
 
-        k=0;
+        k = 0;
         for (int i = 0; i < tc1.length; i++) {
             for (int j = 0; j < tc1SS.length; j++) {
 
@@ -202,7 +176,7 @@ public class Attack {
             }
         }
 
-        k=0;
+        k = 0;
         for (int i = 0; i < tc2.length; i++) {
             for (int j = 0; j < tc2SS.length; j++) {
 
@@ -214,33 +188,19 @@ public class Attack {
             }
         }
 
-        firstBits1=Tools.cleanString(firstBits1);
-        firstBits2=Tools.cleanString(firstBits2);
-        lastBits1=Tools.cleanString(lastBits1);
-        lastBits2=Tools.cleanString(lastBits2);
+        firstBits1 = Tools.cleanString(firstBits1);
+        firstBits2 = Tools.cleanString(firstBits2);
+        lastBits1 = Tools.cleanString(lastBits1);
+        lastBits2 = Tools.cleanString(lastBits2);
 
-        /*for(int i=0;i<firstBits1.length;i++) {
-            System.out.print(firstBits1[i]+" ");
-        }
-        System.out.print("\n");
-        for(int i=0;i<lastBits1.length;i++) {
-            System.out.print(lastBits1[i]+" ");
-        }
-        System.out.print("\n");
-        for(int i=0;i<firstBits2.length;i++) {
-            System.out.print(firstBits2[i]+" ");
-        }
-        System.out.print("\n");
-        for(int i=0;i<lastBits2.length;i++) {
-            System.out.print(lastBits2[i]+" ");
-        }*/
+        String[] firsts = Tools.concatenate(firstBits1, firstBits2); // all first bits found
+        String[] seconds = Tools.concatenate(lastBits1, lastBits2); // all last bits found
 
-        String[] firsts = Tools.concatenate(firstBits1, firstBits2);
-        String[] seconds = Tools.concatenate(lastBits1, lastBits2);
+        String Korig = testKey(firsts, seconds, m, cm);
 
+        System.out.print("\nKey found by DifferrentialCryptanalysis: ");
 
-
-        return testKey(firsts, seconds, m, encryptForDC(S_DES.getSubK(), m, 3));
+        return Korig;
     }
 
 
@@ -249,13 +209,14 @@ public class Attack {
     public static Object[] findCouples(String in, String xorNeeded, boolean sbox) {
 
         String[] couple1 = new String[16];
-        String[] couple2 = {"0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111", "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111"};
+        String[] couple2 = {"0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111", "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111"}; // fixed second element of the couple
         String[] xor = new String[16];
 
         in = Tools.adjustLength(in, 4);
         xorNeeded = Tools.adjustLength(xorNeeded, 3);
 
         for (int i = 0; i < 16; i++) {
+
             couple1[i] = Tools.adjustLength(Integer.toBinaryString((Integer.parseInt(in, 2)) ^ Integer.parseInt(couple2[i], 2)), 4); // first element of the couple= (in XOR couple2[i])
 
             // S1/S2 coordinates (row first bit, column last 3 bits)
@@ -280,14 +241,15 @@ public class Attack {
 
         }
 
-        String[] TCouple1 = new String[16];
-        String[] TCouple2 = new String[16];
+        String[] TCouple1 = new String[16]; // first bits
+        String[] TCouple2 = new String[16]; // last bits
 
         int j = 0;
         for (int i = 0; i < 16; i++) {
-            //System.out.print(xor[i]+ " i "+i+"\n");
+
+            // if xor=xorNeeded save the couple
             if (xor[i].equals(xorNeeded)) {
-                //System.out.print(xor[i]+ " j "+j+"\n");
+
                 TCouple1[j] = couple1[i];
                 TCouple2[j] = couple2[i];
                 j++;
@@ -295,8 +257,8 @@ public class Attack {
 
         }
 
-        TCouple1 = Tools.cleanString(TCouple1);
-        TCouple2 = Tools.cleanString(TCouple2);
+        TCouple1 = Tools.cleanString(TCouple1); // remove null
+        TCouple2 = Tools.cleanString(TCouple2); // remove null
 
         return new Object[]{TCouple1, TCouple2};
 
@@ -316,9 +278,9 @@ public class Attack {
 
             String cmr = Integer.toBinaryString(Integer.parseInt(Tools.expand(mrt), 2) ^ k[i]); // right half expanded and XORed with the i-th key
 
-            cmr = Tools.adjustLength(cmr, 8); //  fixes eventually zeroes lost in conversion
+            cmr = Tools.adjustLength(cmr, 8); // fixes eventually zeroes lost in conversion
 
-            parts = Tools.splitText(cmr, cmr.length() / 2);  // halves string
+            parts = Tools.splitText(cmr, cmr.length() / 2); // halves string
 
             // strings used to calculate the S-BOXES coordinates (left and right half of the expanded and XORed part)
             String XL = parts[0];
@@ -341,7 +303,6 @@ public class Attack {
             cml = Integer.parseInt(mrt, 2); // swaps the left part with the right one
             mrt = cmr; // swaps the right part with the left one
 
-
         }
 
         return Tools.adjustLength(Integer.toBinaryString(cml) + mrt, 12);
@@ -350,68 +311,71 @@ public class Attack {
     //SDES-decrypts the cypher-text in input with the key in input. Variable number of rounds
     public static String decryptforDC(int k[], String m, int r) {
 
-        m = Tools.adjustLength(m, 12);// fixes eventually  zeroes lost in conversion
-        String[] parts = Tools.splitText(m, m.length() / 2);//halves the cyphertext in input
-        String mR1 = parts[0];//swaps right half with the left one (index 0->left part)
-        String mL1 = parts[1];//swaps the left part with the right one (index 1->right part)
+        m = Tools.adjustLength(m, 12); // fixes eventually  zeroes lost in conversion
+        String[] parts = Tools.splitText(m, m.length() / 2); // halves the cyphertext in input
+        String mR1 = parts[0]; // swaps right half with the left one (index 0->left part)
+        String mL1 = parts[1]; // swaps the left part with the right one (index 1->right part)
 
-        String mrt = mR1;//initial initialization
+        String mrt = mR1; // initialization
         int cml = Integer.parseInt(mL1, 2);
 
         for (int i = r - 1; i > 0; i--) {
 
-            String cmr = Integer.toBinaryString(Integer.parseInt(Tools.expand(mrt), 2) ^ k[i]);//left half expanded and XORed with the r-i-th key
+            String cmr = Integer.toBinaryString(Integer.parseInt(Tools.expand(mrt), 2) ^ k[i]); // left half expanded and XORed with the r-i-th key
 
-            cmr = Tools.adjustLength(cmr, 8);// fixes eventually  zeroes lost in conversion
-            parts = Tools.splitText(cmr, cmr.length() / 2);//halves string
+            cmr = Tools.adjustLength(cmr, 8); // fixes eventually  zeroes lost in conversion
+            parts = Tools.splitText(cmr, cmr.length() / 2); // halves string
 
             //strings used to calculate the S-BOXES coordinates (left and right half of the expanded and XORed part)
             String XL = parts[0];
             String XR = parts[1];
 
             //S1 coordinates (row first bit, column last 3 bits)
-            parts = Tools.splitText(XL, 1); //halves string
+            parts = Tools.splitText(XL, 1); // halves string
             String S1row = parts[0];
             String S1col = parts[1];
 
             //S2 coordinates (row first bit, column last 3 bits)
-            parts = Tools.splitText(XR, 1); //halves string
+            parts = Tools.splitText(XR, 1); // halves string
             String S2row = parts[0];
             String S2col = parts[1];
 
-            String SResult = S_DES.getS1((Integer.parseInt(S1row, 2)), (Integer.parseInt(S1col, 2))) + S_DES.getS2((Integer.parseInt(S2row, 2)), (Integer.parseInt(S2col, 2)));//6 bits given by the S-BOXES
+            String SResult = S_DES.getS1((Integer.parseInt(S1row, 2)), (Integer.parseInt(S1col, 2))) + S_DES.getS2((Integer.parseInt(S2row, 2)), (Integer.parseInt(S2col, 2))); // 6 bits given by the S-BOXES
             cmr = Integer.toBinaryString(Integer.parseInt(SResult, 2) ^ cml);
-            cmr = Tools.adjustLength(cmr, 6);// fixes eventually  zeroes lost in conversion
-            cml = Integer.parseInt(mrt, 2);//swaps the left part with the right one
-            mrt = cmr;//swaps the right part with the left one
+            cmr = Tools.adjustLength(cmr, 6); // fixes eventually  zeroes lost in conversion
+            cml = Integer.parseInt(mrt, 2); // swaps the left part with the right one
+            mrt = cmr; // swaps the right part with the left one
 
         }
 
-        return mrt + Tools.adjustLength(Integer.toBinaryString(cml), 6);//last swap performed here
+        return mrt + Tools.adjustLength(Integer.toBinaryString(cml), 6); // last swap performed here
     }
 
+    //test every combination of the possible first-last bits found
     public static String testKey(String[] firsts, String[] seconds, String m, String cm) {
 
-        String kp=new String();
+        String kp = new String();
+        System.out.print("Possible keys:\n");
         for (int i = 0; i < firsts.length; i++) {
             for (int j = 0; j < seconds.length; j++) {
                 String key4 = firsts[i] + seconds[j];
-                String possibleK = Tools.adjustLength(Integer.toBinaryString(0 + key4.charAt(7) + key4.charAt(6) + key4.charAt(0) + key4.charAt(1) + key4.charAt(2) + key4.charAt(3) + key4.charAt(4) + key4.charAt(5)), 8);
+                String possibleK = "0" + key4.charAt(7) + key4.charAt(6) + key4.charAt(0) + key4.charAt(1) + key4.charAt(2) + key4.charAt(3) + key4.charAt(4) + key4.charAt(5); // back-shifts k4 to K and add a zero
+                String possibleK2 = "1" + key4.charAt(7) + key4.charAt(6) + key4.charAt(0) + key4.charAt(1) + key4.charAt(2) + key4.charAt(3) + key4.charAt(4) + key4.charAt(5); // back-shifts k4 to K and add a 1
+                System.out.print(possibleK + " " + possibleK2 + "\n"); // possible keys found
+                S_DES.setSubK(S_DES.generateKeys(possibleK));
+                String t1 = decryptforDC(S_DES.getSubK(), cm, 4); // tests the keys with the 0 added
+                S_DES.setSubK(S_DES.generateKeys(possibleK2));
+                String t2 = decryptforDC(S_DES.getSubK(), cm, 4); // tests the keys with the 1 added
 
-                System.out.print(possibleK);
-                S_DES.generateKeys(possibleK+"\n");
-                if (Attack.decryptforDC(S_DES.getSubK(), cm, 4).equals(m)) {
-                    kp= possibleK;
-                } else {
-                    String possibleK2 = Tools.adjustLength(Integer.toBinaryString(1 + key4.charAt(7) + key4.charAt(6) + key4.charAt(0) + key4.charAt(1) + key4.charAt(2) + key4.charAt(3) + key4.charAt(4) + key4.charAt(5)), 8);
-                    S_DES.generateKeys(possibleK2+"\n");
-                    System.out.print(possibleK2);
-                    if (Attack.decryptforDC(S_DES.getSubK(), cm, 4).equals(m)) {
-                        kp= possibleK2;
-                    }
+                //if some of the decryptions with the found keys matches the original message, return the found key
+                if (t1.equals(m)) {
+                    kp = possibleK;
+                } else if (t2.equals(m)) {
+                    kp = possibleK2;
                 }
             }
         }
+
         return kp;
     }
 }
